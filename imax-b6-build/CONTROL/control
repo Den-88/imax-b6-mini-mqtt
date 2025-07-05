@@ -1,0 +1,6 @@
+Package: imax-b6-mini-mqtt
+Version: 1.0-1
+Depends: python3-light, python3-paho-mqtt
+Architecture: all
+Maintainer: Denis Shakurov <den.shak88@gmail.com>
+Description: A Python script to bridge an iMAX B6 Mini charger to an MQTT broker.

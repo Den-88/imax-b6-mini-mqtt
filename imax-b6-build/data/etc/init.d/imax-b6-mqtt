@@ -1,0 +1,52 @@
+#!/bin/sh /etc/rc.common
+
+USE_PROCD=1
+START=99
+
+# Имя вашего файла конфигурации в /etc/config/
+CONF_FILE="imax-b6-mini-mqtt"
+
+start_service() {
+    # Загружаем конфигурацию
+    config_load "$CONF_FILE"
+
+    # Объявляем переменные для хранения настроек
+    local enabled
+    local mqtt_broker
+    local mqtt_port
+    local mqtt_user
+    local mqtt_password
+    local poll_interval
+    local reconnect_interval
+
+    # Читаем значения из секции 'main' (третий параметр - значение по умолчанию)
+    config_get_bool enabled 'main' 'enabled' '1'
+    config_get mqtt_broker 'main' 'mqtt_broker' '127.0.0.1'
+    config_get mqtt_port 'main' 'mqtt_port' '1883'
+    config_get mqtt_user 'main' 'mqtt_user' ''
+    config_get mqtt_password 'main' 'mqtt_password' ''
+    config_get poll_interval 'main' 'poll_interval' '5'
+    config_get reconnect_interval 'main' 'reconnect_interval' '10'
+
+    # Если в конфиге стоит 'option enabled 0', то сервис не запускается
+    if [ "$enabled" -ne 1 ]; then
+        return 0
+    fi
+
+    # Собираем команду для запуска, передавая настройки как аргументы
+    procd_open_instance
+    procd_set_param command /usr/bin/python3 /usr/bin/imax_b6_mqtt/imax-mqtt-bridge.py
+
+    # Добавляем каждый параметр как аргумент командной строки
+    procd_append_param command --broker "$mqtt_broker"
+    procd_append_param command --port "$mqtt_port"
+    procd_append_param command --user "$mqtt_user"
+    procd_append_param command --password "$mqtt_password"
+    procd_append_param command --poll-interval "$poll_interval"
+    procd_append_param command --reconnect-interval "$reconnect_interval"
+
+    procd_set_param respawn
+    procd_set_param stdout 1
+    procd_set_param stderr 1
+    procd_close_instance
+}

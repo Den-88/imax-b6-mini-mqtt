@@ -1,0 +1,8 @@
+config imax-b6-mini-mqtt main
+    option mqtt_broker '192.168.0.1'
+    option mqtt_port '1883'
+    option mqtt_user 'user'
+    option mqtt_password 'password'
+    option poll_interval '1'
+    option reconnect_interval '5'
+
